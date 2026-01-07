@@ -43,4 +43,4 @@ app.listen(PORT,"0.0.0.0", () => {
   console.log("Server running on port " + PORT);
 });
 require("./models/User");
-require("./models/Transaction");
+require("./models/transaction");
