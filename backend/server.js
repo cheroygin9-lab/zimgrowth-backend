@@ -2,7 +2,7 @@ console.log("🔥 server.js loaded");
 require("dotenv").config();
 console.log("MONGO:", process.env.MONGO_URI);
 
-const userRoutes = require("./routes/user");
+const userRoutes = require("./routes/User");
 const authRoutes = require("./routes/auth");
 const transactionRoutes = require("./routes/transactions");
 require("dotenv").config();
