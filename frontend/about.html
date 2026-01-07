@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>About Us | ZimGrow Invest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e9e7ff;
+  --card:#ffffff;
+  --primary:#6a5cff;
+  --pink:#f25fa6;
+  --text:#2b2b2b;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ===== HEADER ===== */
+header{
+  position:sticky;
+  top:0;
+  background:linear-gradient(90deg,var(--primary),#5848f5);
+  padding:16px 22px;
+  color:#fff;
+  z-index:10;
+  display:flex;
+  align-items:center;
+}
+
+/* HOME BUTTON */
+.home-btn{
+  padding:8px 16px;
+  background:rgba(255,255,255,.2);
+  color:#fff;
+  border-radius:20px;
+  font-size:14px;
+  text-decoration:none;
+  transition:.3s;
+}
+
+.home-btn:hover{
+  background:rgba(255,255,255,.35);
+}
+
+/* ===== CONTAINER ===== */
+.container{
+  max-width:900px;
+  margin:60px auto;
+  padding:0 20px;
+  animation:fadeUp .9s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(40px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+h1{
+  font-size:36px;
+  margin-bottom:20px;
+}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--card);
+  padding:30px;
+  border-radius:22px;
+  margin-bottom:22px;
+  box-shadow:0 30px 60px rgba(0,0,0,.08);
+  animation:slideIn .8s ease;
+}
+
+@keyframes slideIn{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1}
+}
+
+.card h3{
+  margin-bottom:10px;
+  font-size:18px;
+}
+
+.card p{
+  font-size:14px;
+  line-height:1.7;
+  color:#555;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin-bottom:10px;
+  font-size:14px;
+  color:#555;
+}
+
+/* ===== NOTICE ===== */
+.notice{
+  background:linear-gradient(135deg,#fff4f4,#fdecec);
+  border-left:6px solid var(--pink);
+}
+
+/* ===== FOOTER ===== */
+footer{
+  text-align:center;
+  padding:30px 20px;
+  font-size:13px;
+  opacity:.6;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:600px){
+  h1{font-size:28px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <a href="index.html" class="home-btn">← Home</a>
+</header>
+
+<div class="container">
+  <h1>About ZimGrow Invest</h1>
+
+  <div class="card">
+    <p>
+      <strong>ZimGrow Invest</strong> is a Zimbabwe-focused
+      <strong>Global investment and mining platform</strong> designed to help individuals
+      understand how online investing works while earning real money.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>🎯 Our Mission</h3>
+    <p>
+      To educate and empower Zimbabweans by providing a safe, transparent,
+      and easy-to-use investment environment inspired by real fintech platforms.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>💡 How It Works</h3>
+    <ul>
+      <li>Users register and receive a <strong>$10 demo balance</strong></li>
+      <li>Demo investments grow by <strong>20% after 24 hours</strong></li>
+      <li>Users can do deposits and withdrawals after investing on their first package</li>
+      <li>All the processes are transaparent and quick.</li>
+    </ul>
+  </div>
+
+  <div class="card notice">
+    <h3>⚠️ Important Notice</h3>
+    <p>
+      ZimGrow Invest operates <strong>Within Zimbabwe</strong>.
+      This platform accepts deposits and withdrawals and provide real financial returns.
+      All balances, transactions, and profits are kept under transaction history for reference.
+    </p>
+  </div>
+</div>
+
+<footer>
+  © 2026 ZimGrow Invest • All rights reserved.
+</footer>
+
+</body>
+</html>

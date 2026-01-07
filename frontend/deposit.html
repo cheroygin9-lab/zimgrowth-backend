@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deposit | ZimGrow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e9e7ff;
+  --card:#ffffff;
+  --primary:#6a5cff;
+  --green:#16c784;
+  --text:#2b2b2b;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+
+body{
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  color:var(--text);
+}
+
+/* TOP BAR */
+.top-bar{padding:20px 30px}
+.back-btn{
+  padding:10px 18px;
+  background:linear-gradient(90deg,var(--primary),var(--green));
+  color:#fff;
+  border-radius:24px;
+  font-size:14px;
+  text-decoration:none;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+/* CONTAINER */
+.container{
+  background:var(--card);
+  padding:36px;
+  border-radius:28px;
+  width:100%;
+  max-width:640px;
+  box-shadow:0 40px 80px rgba(0,0,0,.1);
+}
+
+h1{text-align:center;font-size:26px}
+.subtitle{text-align:center;font-size:13px;color:#666;margin-bottom:26px}
+
+/* METHODS */
+.methods{
+  display:flex;
+  gap:14px;
+  margin-bottom:26px;
+}
+.method{
+  flex:1;
+  background:#f4f5ff;
+  border-radius:18px;
+  padding:18px 10px;
+  text-align:center;
+  cursor:pointer;
+  border:2px solid transparent;
+}
+.method.active{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(106,92,255,.15);
+}
+.method img{
+  width:42px;
+  display:block;
+  margin:0 auto 8px;
+}
+.method span{font-size:13px;font-weight:500}
+
+/* FORM */
+.form{display:none}
+input{
+  width:100%;
+  padding:15px;
+  border-radius:16px;
+  border:1px solid #ddd;
+  margin-top:10px;
+}
+button{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(90deg,var(--primary),var(--green));
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  margin-top:16px;
+}
+button.loading{background:#ddd;pointer-events:none}
+
+.status{
+  display:none;
+  margin-top:14px;
+  text-align:center;
+  font-size:14px;
+}
+
+@media(max-width:600px){
+  .methods{flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔐 USER AUTH GUARD -->
+<script>
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if(!user){
+  location.href="login.html";
+}
+
+/* ===== STABLE USER KEY ===== */
+const userKey = user.email || user.id || user.name;
+</script>
+
+<div class="top-bar">
+  <a href="dashboard.html" class="back-btn">← Back</a>
+</div>
+
+<div class="main">
+  <div class="container">
+    <h1>Deposit</h1>
+    <p class="subtitle">Choose deposit method & amount</p>
+
+    <div class="methods">
+      <div class="method" onclick="selectMethod(this,'EcoCash')">
+        <img src="https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/8f/27/ce/8f27cee5-dffa-825a-ca19-32959fc04179/AppIcon-0-0-1x_U007emarketing-0-0-0-10-0-85-220.png/512x512bb.jpg">
+        <span>EcoCash</span>
+      </div>
+
+      <div class="method" onclick="selectMethod(this,'Bank Transfer')">
+        <img src="https://static.vecteezy.com/system/resources/previews/023/690/820/original/bank-transfer-flat-icon-design-illustration-finance-symbol-on-white-background-eps-10-file-vector.jpg">
+        <span>Bank Transfer</span>
+      </div>
+
+      <div class="method" onclick="selectMethod(this,'Crypto')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
+        <span>Crypto</span>
+      </div>
+    </div>
+
+    <div class="form" id="form">
+      <input type="number" id="amount" placeholder="Enter amount">
+      <button id="btn" onclick="deposit()">Confirm Deposit</button>
+      <div class="status" id="status">⏳ Processing deposit…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedMethod = "";
+
+/* ===== METHOD SELECT ===== */
+function selectMethod(el, method){
+  document.querySelectorAll('.method').forEach(m=>m.classList.remove('active'));
+  el.classList.add('active');
+  selectedMethod = method;
+  document.getElementById("form").style.display = "block";
+}
+
+/* ===== TX ID ===== */
+function generateTxID(){
+  return "DP-" + Math.random().toString(36).substring(2,10).toUpperCase();
+}
+
+/* ===== TRANSACTIONS ===== */
+function getTransactions(){
+  return JSON.parse(
+    localStorage.getItem("transactions_" + userKey) || "[]"
+  );
+}
+
+/* ===== DEPOSIT ===== */
+function deposit(){
+  const amount = Number(document.getElementById("amount").value);
+  if(!amount || amount <= 0 || !selectedMethod){
+    alert("Enter a valid amount and select a method");
+    return;
+  }
+
+  const btn = document.getElementById("btn");
+  btn.classList.add("loading");
+  btn.innerText = "";
+  document.getElementById("status").style.display = "block";
+
+  const tx = getTransactions();
+  const txId = generateTxID();
+
+  tx.push({
+    txId,
+    type: "Deposit",
+    method: selectedMethod,
+    amount,
+    status: "Completed",
+    date: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("transactions_" + userKey, JSON.stringify(tx));
+
+  localStorage.setItem("lastReceipt", JSON.stringify({
+    txId,
+    type: "Deposit",
+    method: selectedMethod,
+    amount,
+    date: new Date().toLocaleString()
+  }));
+
+  setTimeout(()=>{
+    location.href = "dashboard.html";
+  },1200);
+}
+</script>
+
+</body>
+</html>

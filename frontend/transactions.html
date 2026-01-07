@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Transaction History | ZimGrow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e9e7ff;
+  --card:#ffffff;
+  --primary:#6a5cff;
+  --green:#16c784;
+  --pink:#f25fa6;
+  --text:#2b2b2b;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+
+body{
+  background:var(--bg);
+  min-height:100vh;
+  padding:30px 20px;
+  color:var(--text);
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+h1{font-size:32px}
+
+.back-btn{
+  padding:10px 18px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(90deg,var(--primary),var(--green));
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+}
+
+.table{
+  background:var(--card);
+  border-radius:28px;
+  box-shadow:0 40px 80px rgba(0,0,0,.1);
+  overflow:hidden;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1.1fr 1fr 1fr 1fr 1fr 1.2fr;
+  padding:16px 20px;
+  font-size:13px;
+  align-items:center;
+}
+
+.row.header{
+  background:#f4f5ff;
+  font-weight:600;
+}
+
+.row:not(.header){
+  border-top:1px solid #eee;
+}
+
+.type.deposit{color:var(--green);font-weight:600}
+.type.withdraw{color:var(--pink);font-weight:600}
+.type.profit{color:#0ea5e9;font-weight:600}
+
+.status.completed{color:var(--green)}
+.status.approved{color:var(--green)}
+.status.processing{color:#f59e0b}
+
+.amount{font-weight:600}
+
+.empty{
+  padding:40px;
+  text-align:center;
+  color:#777;
+}
+
+@media(max-width:800px){
+  .row{grid-template-columns:1fr 1fr;font-size:12px}
+  .row.header{display:none}
+  .topbar{flex-direction:column;gap:10px;align-items:flex-start}
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔐 AUTH GUARD -->
+<script>
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if(!user){
+  location.href = "login.html";
+}
+
+/* ===== STABLE USER KEY ===== */
+const userKey = user.email || user.id || user.name;
+</script>
+
+<div class="container">
+
+  <div class="topbar">
+    <h1>Transaction History</h1>
+    <button class="back-btn" onclick="location.href='dashboard.html'">
+      ⬅ Return to Dashboard
+    </button>
+  </div>
+
+  <div class="table" id="table">
+    <div class="row header">
+      <div>Transaction ID</div>
+      <div>Type</div>
+      <div>Method</div>
+      <div>Amount</div>
+      <div>Status</div>
+      <div>Date</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function loadTransactions(){
+  const table = document.getElementById("table");
+
+  const transactions = JSON.parse(
+    localStorage.getItem("transactions_" + userKey) || "[]"
+  ).sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  table.innerHTML = `
+    <div class="row header">
+      <div>Transaction ID</div>
+      <div>Type</div>
+      <div>Method</div>
+      <div>Amount</div>
+      <div>Status</div>
+      <div>Date</div>
+    </div>
+  `;
+
+  if(transactions.length === 0){
+    table.innerHTML += `<div class="empty">No transactions yet</div>`;
+    return;
+  }
+
+  transactions.forEach(t=>{
+    table.innerHTML += `
+      <div class="row">
+        <div>${t.txId || "-"}</div>
+        <div class="type ${t.type.toLowerCase()}">${t.type}</div>
+        <div>${t.method || "-"}</div>
+        <div class="amount">$${t.amount.toFixed(2)}</div>
+        <div class="status ${(t.status || "completed").toLowerCase()}">
+          ${t.status || "Completed"}
+        </div>
+        <div>${t.date}</div>
+      </div>
+    `;
+  });
+}
+
+loadTransactions();
+</script>
+
+</body>
+</html>

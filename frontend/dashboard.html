@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard | ZimGrow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e9e7ff;
+  --card:#ffffff;
+  --primary:#6a5cff;
+  --green:#16c784;
+  --red:#ef4444;
+  --text:#2b2b2b;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:var(--bg);padding:30px;color:var(--text)}
+.top-bar{max-width:1200px;margin:0 auto 20px;display:flex;justify-content:space-between;align-items:center}
+.home-btn{padding:10px 18px;background:linear-gradient(90deg,var(--primary),var(--green));color:#fff;border-radius:24px;text-decoration:none}
+.logout{cursor:pointer;color:var(--red);font-size:14px}
+.grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.card{background:var(--card);padding:30px;border-radius:28px;box-shadow:0 40px 80px rgba(0,0,0,.1)}
+.stat{font-size:14px;color:#666;margin-bottom:6px}
+.progress{height:10px;background:#eee;border-radius:20px;overflow:hidden;margin:12px 0}
+.bar{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--green))}
+button{width:100%;padding:14px;border:none;border-radius:30px;background:linear-gradient(90deg,var(--primary),var(--green));color:#fff;margin-top:10px;cursor:pointer}
+button.alt{background:linear-gradient(90deg,#6366f1,#a855f7)}
+button.danger{background:linear-gradient(90deg,var(--red),#f87171)}
+button.locked{background:#9ca3af;cursor:not-allowed}
+</style>
+</head>
+
+<body>
+
+<script>
+/* ===== AUTH GUARD (JWT) ===== */
+const API_URL = "http://localhost:5000/api";
+const token = localStorage.getItem("token");
+
+if(!token){
+  location.href="login.html";
+}
+</script>
+
+<div class="top-bar">
+  <a href="index.html" class="home-btn">🏠 Home</a>
+  <div class="logout" onclick="logout()">Logout</div>
+</div>
+
+<div class="grid">
+
+  <!-- BALANCE -->
+  <div class="card">
+    <h1>$<span id="balance">0.00</span></h1>
+    <div class="stat">Available Balance</div>
+    <div class="stat">Welcome, <b id="username">Loading...</b> 👋</div>
+  </div>
+
+  <!-- ACTIVE INVESTMENT -->
+  <div class="card">
+    <h3>Active Investment</h3>
+    <div class="stat"><b>Plan:</b> <span id="planName">None</span></div>
+    <div class="stat"><b>Amount Invested:</b> $<span id="invested">0</span></div>
+    <div class="stat"><b>Total Return:</b> $<span id="totalReturn">0</span></div>
+    <div class="stat"><b>Profit:</b> $<span id="profit">0</span></div>
+    <div class="stat"><b>Time Left:</b> <span id="timer">--:--:--</span></div>
+
+    <div class="progress"><div class="bar" id="growthBar"></div></div>
+    <button class="danger" onclick="cancelPlan()">Cancel / Change Plan</button>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="card">
+    <h3>Activity</h3>
+    <p><strong id="depCount">0</strong> Deposits</p>
+
+    <button onclick="window.location.href='./deposit.html'">Deposit</button>
+    <button onclick="window.location.href='./withdraw.html'">Withdraw</button>
+    <button class="alt" onclick="window.location.href='./transactions.html'">📜 Transactions</button>
+  </div>
+
+</div>
+
+<script>
+let userKey = null;
+
+/* ===== LOAD USER FROM BACKEND ===== */
+async function loadUser(){
+  try{
+    const res = await fetch(`${API_URL}/user/me`,{
+      headers:{
+        "Authorization":"Bearer "+token
+      }
+    });
+
+    if(!res.ok) throw new Error("Unauthorized");
+
+    const user = await res.json();
+    userKey = user.email;
+
+    document.getElementById("username").innerText = user.name;
+    document.getElementById("balance").innerText = user.balance.toFixed(2);
+
+  }catch(err){
+    console.error(err);
+    localStorage.removeItem("token");
+    location.href="login.html";
+  }
+}
+
+/* ===== TRANSACTIONS (UNCHANGED) ===== */
+function getTransactions(){
+  return JSON.parse(
+    localStorage.getItem("transactions_" + userKey) || "[]"
+  );
+}
+
+function calculateBalance(){
+  const tx = getTransactions();
+  let balance = 0;
+
+  tx.forEach(t=>{
+    if(t.type === "Deposit") balance += t.amount;
+    if(t.type === "Withdraw") balance -= t.amount;
+    if(t.type === "Profit") balance += t.amount;
+  });
+
+  return balance;
+}
+
+function loadDashboard(){
+  if(!userKey) return;
+  const tx = getTransactions();
+
+  document.getElementById("depCount").innerText =
+    tx.filter(t=>t.type==="Deposit").length;
+}
+
+/* ===== PLAN LOGIC (UNCHANGED) ===== */
+function loadPlan(){
+  const plan = JSON.parse(localStorage.getItem("activeInvestment"));
+  if(!plan) return;
+
+  const totalTime = 24*60*60*1000;
+  const elapsed = Date.now() - plan.start;
+  const percent = Math.min(elapsed/totalTime*100,100);
+
+  const profit = plan.amount * 0.2;
+  const totalReturn = plan.amount + profit;
+
+  document.getElementById("planName").innerText = plan.name;
+  document.getElementById("invested").innerText = plan.amount.toFixed(2);
+  document.getElementById("profit").innerText = profit.toFixed(2);
+  document.getElementById("totalReturn").innerText = totalReturn.toFixed(2);
+  document.getElementById("growthBar").style.width = percent+"%";
+}
+
+/* ===== TIMER (UNCHANGED) ===== */
+function updateTimer(){
+  const timerEl = document.getElementById("timer");
+  const plan = JSON.parse(localStorage.getItem("activeInvestment"));
+
+  if(!plan || !plan.start){
+    timerEl.innerText="--:--:--";
+    return;
+  }
+
+  const endTime = plan.start + 24*60*60*1000;
+  const remaining = endTime - Date.now();
+
+  if(remaining<=0){
+    timerEl.innerText="00:00:00";
+    return;
+  }
+
+  const h=Math.floor(remaining/3600000);
+  const m=Math.floor((remaining%3600000)/60000);
+  const s=Math.floor((remaining%60000)/1000);
+
+  timerEl.innerText=
+    `${String(h).padStart(2,"0")}:`+
+    `${String(m).padStart(2,"0")}:`+
+    `${String(s).padStart(2,"0")}`;
+}
+
+function cancelPlan(){
+  if(confirm("Terminate current investment?")){
+    localStorage.removeItem("activeInvestment");
+    location.href="investment.html";
+  }
+}
+
+function logout(){
+  localStorage.removeItem("token");
+  location.href="login.html";
+}
+
+/* ===== INIT ===== */
+loadUser();
+setInterval(()=>{
+  loadDashboard();
+  loadPlan();
+  updateTimer();
+},1000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ZimGrow Investment</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg:#e9e7ff;
+  --card:#ffffff;
+  --primary:#6a5cff;
+  --pink:#f25fa6;
+  --green:#16c784;
+  --text:#2b2b2b;
+}
+
+/* DARK MODE */
+body.dark{
+  --bg:#0f172a;
+  --card:#111827;
+  --text:#e5e7eb;
+  --primary:#8b5cf6;
+  --pink:#ec4899;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Inter,sans-serif}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  transition:.3s;
+}
+
+/* TOGGLE */
+.toggle{
+  position:fixed;
+  top:20px;
+  left:20px;
+  font-size:28px;
+  cursor:pointer;
+  z-index:2000;
+}
+
+/* MENU */
+.menu{
+  position:fixed;
+  top:0;
+  left:-100%;
+  width:260px;
+  height:100vh;
+  background:var(--card);
+  padding:30px 24px;
+  box-shadow:20px 0 60px rgba(0,0,0,.15);
+  transition:.4s;
+  z-index:1999;
+}
+.menu.active{left:0}
+.menu a{
+  display:block;
+  padding:12px 0;
+  color:var(--text);
+  text-decoration:none;
+}
+
+.dark-btn{
+  margin-top:20px;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:22px;
+  background:linear-gradient(90deg,var(--primary),var(--pink));
+  color:#fff;
+  cursor:pointer;
+}
+
+/* OVERLAY */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  opacity:0;
+  pointer-events:none;
+}
+.overlay.active{opacity:1;pointer-events:auto}
+
+/* HERO */
+.wrapper{
+  max-width:1200px;
+  margin:100px auto 60px;
+  padding:30px;
+}
+.card{
+  background:var(--card);
+  border-radius:28px;
+  padding:36px;
+  box-shadow:0 40px 80px rgba(0,0,0,.08);
+}
+h1{font-size:46px}
+h1 span{color:var(--primary)}
+p{margin-top:12px;color:#666}
+body.dark p{color:#cbd5e1}
+.btn{
+  display:inline-block;
+  margin-top:24px;
+  padding:14px 34px;
+  background:var(--pink);
+  color:#fff;
+  border-radius:30px;
+  text-decoration:none;
+}
+
+/* MARKETS */
+.markets{
+  max-width:1200px;
+  margin:40px auto;
+  padding:20px;
+}
+.markets h2{text-align:center;margin-bottom:20px}
+.market-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+}
+.market{
+  background:var(--card);
+  padding:18px;
+  border-radius:22px;
+  box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+.market-top{
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+}
+.market canvas{margin-top:10px}
+.green{color:#16c784}
+.red{color:#ef4444}
+
+/* TESTIMONIALS */
+.testimonials{
+  max-width:1200px;
+  margin:60px auto;
+  padding:20px;
+}
+.testimonials h2{text-align:center;margin-bottom:20px}
+.track{
+  display:flex;
+  gap:20px;
+  overflow-x:auto;
+}
+.track::-webkit-scrollbar{display:none}
+.review{
+  min-width:320px;
+  background:var(--card);
+  padding:22px;
+  border-radius:22px;
+  box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+.review img{
+  width:46px;height:46px;border-radius:50%;object-fit:cover;
+}
+.stars{color:#facc15}
+.author{font-weight:600;margin-top:10px}
+
+@media(max-width:900px){
+  h1{font-size:36px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="toggle" onclick="toggleMenu()">☰</div>
+
+<div class="menu" id="menu">
+  <a href="register.html" data-auth="out">Register</a>
+  <a href="login.html" data-auth="out">Login</a>
+
+  <a href="dashboard.html" data-auth="in">Dashboard</a>
+  <a href="investment.html" data-auth="in">Investment</a>
+  <a href="deposit.html" data-auth="in">Deposit</a>
+  <a href="withdraw.html" data-auth="in">Withdraw</a>
+  <a href="#" data-auth="in" onclick="logout()">Logout</a>
+
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+
+  <button class="dark-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="wrapper">
+  <div class="card">
+    <h1>Smart <span>ZimGrow Investing</span></h1>
+    <p>Practice investing with real-feel market movements — risk free.</p>
+    <a href="register.html" class="btn" data-auth="out">Get Started</a>
+  </div>
+</div>
+
+<!-- LIVE MARKETS -->
+<div class="markets">
+  <h2>Live Market Prices</h2>
+  <div class="market-grid" id="marketGrid"></div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials">
+  <h2>What Users Say</h2>
+  <div class="track" id="track">
+    <div class="review">
+      <img src="https://randomuser.me/api/portraits/men/32.jpg">
+      <div class="stars">★★★★★</div>
+      <p>ZimGrow made investing easy to understand.</p>
+      <div class="author">Tendai M.</div>
+    </div>
+    <div class="review">
+      <img src="https://randomuser.me/api/portraits/women/45.jpg">
+      <div class="stars">★★★★★</div>
+      <p>The demo feels professional and realistic.</p>
+      <div class="author">Sarah K.</div>
+    </div>
+    <div class="review">
+      <img src="https://randomuser.me/api/portraits/men/41.jpg">
+      <div class="stars">★★★★☆</div>
+      <p>Clean UI and smooth experience.</p>
+      <div class="author">Blessing T.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CHART LIB -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const menu=document.getElementById("menu");
+const overlay=document.getElementById("overlay");
+
+function toggleMenu(){
+  menu.classList.toggle("active");
+  overlay.classList.toggle("active");
+}
+
+function toggleDarkMode(){
+  document.body.classList.toggle("dark");
+}
+
+/* AUTH */
+const user=JSON.parse(localStorage.getItem("currentUser"));
+document.querySelectorAll("[data-auth='in']").forEach(el=>el.style.display=user?"block":"none");
+document.querySelectorAll("[data-auth='out']").forEach(el=>el.style.display=user?"none":"block");
+
+function logout(){
+  localStorage.removeItem("currentUser");
+  location.href="login.html";
+}
+
+/* MARKETS */
+const markets=[
+  {s:"BTC",p:42150},
+  {s:"ETH",p:2280},
+  {s:"BNB",p:312},
+  {s:"SOL",p:98},
+  {s:"XRP",p:0.61},
+  {s:"ADA",p:0.48}
+];
+
+const grid=document.getElementById("marketGrid");
+const charts=[];
+
+markets.forEach((m,i)=>{
+  const d=document.createElement("div");
+  d.className="market";
+  d.innerHTML=`
+    <div class="market-top">
+      <b>${m.s}/USD</b>
+      <span id="p${i}">$${m.p}</span>
+    </div>
+    <small id="c${i}" class="green">+0.00%</small>
+    <canvas id="chart${i}" height="80"></canvas>
+  `;
+  grid.appendChild(d);
+
+  const ctx=document.getElementById("chart"+i).getContext("2d");
+  charts[i]=new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:Array(20).fill(""),
+      datasets:[{
+        data:Array(20).fill(m.p),
+        borderColor:"#16c784",
+        borderWidth:2,
+        tension:.4,
+        pointRadius:0
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{x:{display:false},y:{display:false}}
+    }
+  });
+});
+
+setInterval(()=>{
+  markets.forEach((m,i)=>{
+    let d=(Math.random()-0.5)*2;
+    m.p+=m.p*d/100;
+
+    document.getElementById("p"+i).innerText="$"+m.p.toFixed(m.p<1?4:2);
+    const c=document.getElementById("c"+i);
+    c.innerText=(d>0?"+":"")+d.toFixed(2)+"%";
+    c.className=d>=0?"green":"red";
+
+    charts[i].data.datasets[0].data.push(m.p);
+    charts[i].data.datasets[0].data.shift();
+    charts[i].data.datasets[0].borderColor=d>=0?"#16c784":"#ef4444";
+    charts[i].update();
+  });
+},2000);
+
+/* AUTO SCROLL REVIEWS */
+const t=document.getElementById("track");
+let s=0;
+setInterval(()=>{
+  s+=1;
+  if(s>=t.scrollWidth-t.clientWidth)s=0;
+  t.scrollLeft=s;
+},30);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Investment Plans | ZimGrow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg:#e9e7ff;
+  --card:#ffffff;
+  --primary:#6a5cff;
+  --pink:#f25fa6;
+  --green:#16c784;
+  --text:#2b2b2b;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Inter,sans-serif}
+
+body{
+  background:var(--bg);
+  padding:40px 20px;
+  color:var(--text);
+}
+
+/* BACK */
+.back-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  padding:10px 16px;
+  background:linear-gradient(90deg,var(--primary),var(--green));
+  color:#fff;
+  border-radius:24px;
+  cursor:pointer;
+  z-index:1000;
+}
+
+/* HEADER */
+.top{
+  max-width:1200px;
+  margin:60px auto 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.users{
+  background:#fff;
+  padding:10px 18px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+
+/* PLANS */
+.plan-grid{
+  max-width:1200px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.plan{
+  background:#fff;
+  padding:26px;
+  border-radius:24px;
+  box-shadow:0 20px 40px rgba(0,0,0,.08);
+  cursor:pointer;
+  transition:.3s;
+}
+
+.plan:hover{transform:translateY(-6px)}
+.plan.active{outline:3px solid var(--primary)}
+.plan p{color:#666;font-size:14px}
+
+.plan button{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  border:none;
+  border-radius:20px;
+  background:linear-gradient(90deg,var(--primary),var(--green));
+  color:#fff;
+}
+
+/* ACTION */
+.action{
+  text-align:center;
+  margin:40px 0;
+}
+
+.action button{
+  padding:14px 40px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(90deg,var(--pink),var(--primary));
+  color:#fff;
+  font-size:16px;
+}
+
+/* CHART */
+.chart-box{
+  max-width:1200px;
+  margin:40px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:24px;
+  box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+
+canvas{width:100%;height:220px}
+
+/* TESTIMONIALS */
+.testimonials{
+  max-width:1200px;
+  margin:50px auto;
+  text-align:center;
+}
+
+.testimonial{
+  background:#fff;
+  padding:26px;
+  border-radius:24px;
+  box-shadow:0 20px 40px rgba(0,0,0,.08);
+  display:none;
+}
+
+.testimonial.active{display:block}
+
+@media(max-width:700px){
+  .top{flex-direction:column;gap:12px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="back-btn" onclick="location.href='index.html'">← Back</div>
+
+<div class="top">
+  <h1>Investment Plans</h1>
+  <div class="users">👥 Active users: <b id="users">1248</b></div>
+</div>
+
+<div class="plan-grid">
+  <div class="plan" onclick="selectPlan(this,'Beginner',50)">
+    <h3>Beginner</h3>
+    <p>$50 – $199</p>
+    <p><strong>10%</strong> Return</p>
+    <button>Select</button>
+  </div>
+
+  <div class="plan" onclick="selectPlan(this,'Starter',200)">
+    <h3>Starter</h3>
+    <p>$200 – $499</p>
+    <p><strong>15%</strong> Return</p>
+    <button>Select</button>
+  </div>
+
+  <div class="plan" onclick="selectPlan(this,'Silver',500)">
+    <h3>Silver</h3>
+    <p>$500 – $999</p>
+    <p><strong>20%</strong> Return</p>
+    <button>Select</button>
+  </div>
+
+  <div class="plan" onclick="selectPlan(this,'Gold',1000)">
+    <h3>Gold</h3>
+    <p>$1,000 – $1,999</p>
+    <p><strong>25%</strong> Return</p>
+    <button>Select</button>
+  </div>
+
+  <div class="plan" onclick="selectPlan(this,'Platinum',2000)">
+    <h3>Platinum</h3>
+    <p>$2,000 – $4,999</p>
+    <p><strong>30%</strong> Return</p>
+    <button>Select</button>
+  </div>
+
+  <div class="plan" onclick="selectPlan(this,'Pro',5000)">
+    <h3>Pro</h3>
+    <p>$5,000+</p>
+    <p><strong>40%</strong> Return</p>
+    <button>Select</button>
+  </div>
+</div>
+
+<div class="action" id="action">
+  <button onclick="goDeposit()">Proceed to Deposit</button>
+</div>
+
+<div class="chart-box">
+  <h3>Market Performance</h3>
+  <canvas id="chart"></canvas>
+</div>
+
+<div class="testimonials">
+  <h2>What Users Say</h2>
+  <div class="testimonial active">“Very realistic market movement, perfect for learning.” – Tendai</div>
+  <div class="testimonial">“Plans make sense and UI feels premium.” – Sarah</div>
+  <div class="testimonial">“Best demo platform I’ve used so far.” – Michael</div>
+</div>
+
+<script>
+/* PLAN */
+let selectedPlan=null;
+
+function selectPlan(el,name,amount){
+  document.querySelectorAll(".plan").forEach(p=>p.classList.remove("active"));
+  el.classList.add("active");
+
+  selectedPlan={name,amount,start:Date.now()};
+  localStorage.setItem("activeInvestment",JSON.stringify(selectedPlan));
+
+  document.getElementById("action")
+    .scrollIntoView({behavior:"smooth"});
+}
+
+function goDeposit(){
+  if(!selectedPlan){
+    alert("Select a plan first");
+    return;
+  }
+  localStorage.setItem("prefillAmount",selectedPlan.amount);
+  location.href="deposit.html";
+}
+
+/* USERS */
+let users=1248;
+setInterval(()=>{
+  users+=Math.floor(Math.random()*3);
+  document.getElementById("users").innerText=users;
+},2000);
+
+/* TESTIMONIALS */
+let i=0;
+setInterval(()=>{
+  const t=document.querySelectorAll(".testimonial");
+  t.forEach(x=>x.classList.remove("active"));
+  i=(i+1)%t.length;
+  t[i].classList.add("active");
+},4000);
+
+/* MARKET CHART */
+const c=document.getElementById("chart");
+const ctx=c.getContext("2d");
+c.width=1000;c.height=220;
+
+let prices=[...Array(50)].map(()=>100+Math.random()*20);
+
+setInterval(()=>{
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.beginPath();
+  prices.forEach((p,i)=>{
+    ctx.lineTo(i*20,220-p);
+  });
+  ctx.strokeStyle="#6a5cff";
+  ctx.stroke();
+  prices.shift();
+  prices.push(prices[prices.length-1]+(Math.random()-0.5)*8);
+},700);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contact Us | ZimGrow Invest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e9e7ff;
+  --card:#ffffff;
+  --primary:#6a5cff;
+  --pink:#f25fa6;
+  --green:#16c784;
+  --text:#2b2b2b;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ===== HEADER ===== */
+header{
+  position:sticky;
+  top:0;
+  background:linear-gradient(90deg,var(--primary),#5848f5);
+  padding:16px 22px;
+  color:#fff;
+  z-index:10;
+  display:flex;
+  align-items:center;
+}
+
+.home-btn{
+  padding:8px 16px;
+  background:rgba(255,255,255,.2);
+  color:#fff;
+  border-radius:20px;
+  font-size:14px;
+  text-decoration:none;
+  transition:.3s;
+}
+
+.home-btn:hover{
+  background:rgba(255,255,255,.35);
+}
+
+/* ===== CONTAINER ===== */
+.container{
+  max-width:900px;
+  margin:60px auto;
+  padding:0 20px;
+  animation:fadeUp .9s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(40px)}
+  to{opacity:1}
+}
+
+h1{
+  font-size:36px;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  font-size:14px;
+  color:#555;
+  margin-bottom:30px;
+}
+
+/* ===== GRID ===== */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--card);
+  padding:30px;
+  border-radius:22px;
+  box-shadow:0 30px 60px rgba(0,0,0,.08);
+  animation:slideIn .8s ease;
+}
+
+@keyframes slideIn{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1}
+}
+
+.card h3{
+  margin-bottom:14px;
+  font-size:18px;
+}
+
+.card p{
+  font-size:14px;
+  line-height:1.7;
+  color:#555;
+}
+
+/* ===== FORM ===== */
+input, textarea{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid #ddd;
+  margin-bottom:14px;
+  font-size:14px;
+}
+
+textarea{resize:none}
+
+input:focus, textarea:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(106,92,255,.15);
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(90deg,var(--primary),var(--pink));
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+  transition:.3s;
+}
+
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 30px rgba(106,92,255,.35);
+}
+
+/* ===== INFO ===== */
+.info-item{
+  margin-bottom:12px;
+  font-size:14px;
+  color:#555;
+}
+
+/* ===== POPUP ===== */
+.popup{
+  position:fixed;
+  top:-80px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#fff;
+  padding:16px 22px;
+  border-radius:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:14px;
+  transition:.5s;
+  z-index:3000;
+}
+
+.popup.show{
+  top:20px;
+}
+
+.popup span{
+  color:var(--green);
+  font-weight:600;
+}
+
+/* ===== FOOTER ===== */
+footer{
+  text-align:center;
+  padding:30px 20px;
+  font-size:13px;
+  opacity:.6;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:800px){
+  .grid{grid-template-columns:1fr}
+  h1{font-size:28px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <a href="index.html" class="home-btn">← Home</a>
+</header>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <span>✅</span> Your query has been submitted. We will respond shortly.
+</div>
+
+<div class="container">
+  <h1>Contact Us</h1>
+  <p class="subtitle">Need help or have questions? Reach out to our support team.</p>
+
+  <div class="grid">
+
+    <!-- FORM -->
+    <div class="card">
+      <h3>📩 Send Us a Message</h3>
+      <input type="text" placeholder="Full Name">
+      <input type="email" placeholder="Email Address">
+      <textarea rows="4" placeholder="Your message"></textarea>
+      <button onclick="sendMsg()">Send Message</button>
+    </div>
+
+    <!-- INFO -->
+    <div class="card">
+      <h3>📞 Support Information</h3>
+      <div class="info-item">📧 Email: support@zimgrow.com</div>
+      <div class="info-item">⏰ Support Hours: 24/7</div>
+      <div class="info-item">🌍 Region: Zimbabwe</div>
+      <div class="info-item">🔐 Platform : Country Wide</div>
+
+      <p style="margin-top:16px;font-size:13px;">
+        This platform operates strictly in Zimbabwe.
+        We aim at achieving financial literacy and growth within the country.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  © 2026 ZimGrow Invest • All rights reserved.
+</footer>
+
+<script>
+function sendMsg(){
+  const popup = document.getElementById("popup");
+  popup.classList.add("show");
+
+  setTimeout(()=>{
+    popup.classList.remove("show");
+  },3000);
+}
+</script>
+
+</body>
+</html>
