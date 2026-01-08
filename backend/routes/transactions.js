@@ -1,56 +1,72 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 const router = express.Router();
-const auth = require("../middleware/auth");
-const Transaction = require("../models/transaction");
 
-/* 🔹 GET ALL USER TRANSACTIONS */
-router.get("/", auth, async (req, res) => {
+/* ================= REGISTER ================= */
+router.post("/register", async (req, res) => {
   try {
-    const tx = await Transaction
-      .find({ user: req.user.id })
-      .sort({ createdAt: -1 });
-
-    res.json(tx);
+    const { name, email, password } = req.body;
+    
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+    
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      balance: 10 // 🎁 demo bonus
+    });
+    
+    res.json({ message: "Account created successfully" });
   } catch (err) {
-    console.error("TX FETCH ERROR:", err.message);
-    res.status(500).json({ message: "Server error" });
+    console.error("REGISTER ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
-/* 🔹 CREATE DEPOSIT */
-router.post("/deposit", auth, async (req, res) => {
+/* ================= LOGIN ================= */
+router.post("/login", async (req, res) => {
   try {
-    const { amount, method } = req.body;
-
-    const tx = await Transaction.create({
-      user: req.user.id,
-      type: "Deposit",
-      amount,
-      method
+    const { email, password } = req.body;
+    
+    const user = await User.findOne({ email });
+    
+    // ✅ FIXED: Correct error message when user not found
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET || "zimgrow_secret",
+      { expiresIn: "7d" }
+    );
+    
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        balance: user.balance
+      }
     });
-
-    res.json(tx);
   } catch (err) {
-    console.error("DEPOSIT ERROR:", err.message);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-/* 🔹 CREATE WITHDRAW */
-router.post("/withdraw", auth, async (req, res) => {
-  try {
-    const { amount, method } = req.body;
-
-    const tx = await Transaction.create({
-      user: req.user.id,
-      type: "Withdraw",
-      amount,
-      method
-    });
-
-    res.json(tx);
-  } catch (err) {
-    console.error("WITHDRAW ERROR:", err.message);
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
