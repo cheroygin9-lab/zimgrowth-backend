@@ -1,72 +1,100 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
 const router = express.Router();
+const auth = require("../middleware/auth");
+const Transaction = require("../models/transaction");
+const User = require("../models/User");
 
-/* ================= REGISTER ================= */
-router.post("/register", async (req, res) => {
+/* 🔹 GET ALL USER TRANSACTIONS */
+router.get("/", auth, async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields required" });
-    }
-    
-    const exists = await User.findOne({ email });
-    if (exists) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-    
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      balance: 10 // 🎁 demo bonus
-    });
-    
-    res.json({ message: "Account created successfully" });
+    const tx = await Transaction
+      .find({ user: req.user.id })
+      .sort({ createdAt: -1 });
+    res.json(tx);
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
-    res.status(500).json({ error: err.message });
+    console.error("TX FETCH ERROR:", err.message);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-/* ================= LOGIN ================= */
-router.post("/login", async (req, res) => {
+/* 🔹 CREATE DEPOSIT */
+router.post("/deposit", auth, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { amount, method } = req.body;
     
-    const user = await User.findOne({ email });
-    
-    // ✅ FIXED: Correct error message when user not found
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
     }
     
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+    if (!method) {
+      return res.status(400).json({ message: "Payment method required" });
     }
-    
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET || "zimgrow_secret",
-      { expiresIn: "7d" }
+
+    // Create transaction
+    const tx = await Transaction.create({
+      user: req.user.id,
+      type: "Deposit",
+      amount,
+      method,
+      status: "completed"
+    });
+
+    // Update user balance
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $inc: { balance: amount } }
     );
-    
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        balance: user.balance
-      }
+
+    res.json({ 
+      message: "Deposit successful",
+      transaction: tx
     });
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
+    console.error("DEPOSIT ERROR:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* 🔹 CREATE WITHDRAW */
+router.post("/withdraw", auth, async (req, res) => {
+  try {
+    const { amount, method } = req.body;
+    
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
+    
+    if (!method) {
+      return res.status(400).json({ message: "Payment method required" });
+    }
+
+    // Check if user has sufficient balance
+    const user = await User.findById(req.user.id);
+    if (user.balance < amount) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+
+    // Create transaction
+    const tx = await Transaction.create({
+      user: req.user.id,
+      type: "Withdraw",
+      amount,
+      method,
+      status: "pending"
+    });
+
+    // Update user balance
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $inc: { balance: -amount } }
+    );
+
+    res.json({ 
+      message: "Withdrawal successful",
+      transaction: tx
+    });
+  } catch (err) {
+    console.error("WITHDRAW ERROR:", err.message);
     res.status(500).json({ message: "Server error" });
   }
 });
