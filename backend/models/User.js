@@ -18,13 +18,19 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
     
-    // ✅ NO manual hashing - let the pre-save hook do it
-    const user = await User.create({
+    // ✅ Hash manually here and skip the pre-save hook
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Use Model constructor instead of create to skip middleware
+    const user = new User({
       name,
       email,
-      password: password, // Raw password - model will hash it
-      balance: 10 // 🎁 demo bonus
+      password: hashedPassword,
+      balance: 10
     });
+    
+    // Save with validateBeforeSave but skip the pre-save hook
+    await user.save({ validateBeforeSave: true });
     
     res.json({ message: "Account created successfully" });
   } catch (err) {
